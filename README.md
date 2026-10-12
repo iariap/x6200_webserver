@@ -25,9 +25,11 @@ Band editor, digital modes, memories and channels, CW messages, DX cluster,
 wfview server, Field Ops, logs (ADIF export), file browser, gallery, backup and
 restore, time/NTP, remote control, plus the JSON API under `/api`.
 
-Pages whose subsystem is not in the image yet (live remote control socket, DX
-cluster config, Field Ops helper, CW trainer) still render; they show an empty
-or disabled state.
+Pages whose subsystem may not be running yet (the live remote control socket, the
+DX cluster, the Field Ops helper) still render; they show an empty or disabled state
+instead of failing. All of them are in the ROM now - the remote socket is served by
+the GUI, the cluster by its own app and the Field Ops helper by
+`/usr/sbin/x6200-field` - so the pages show live data when they are up.
 
 ## Running it on a PC
 
