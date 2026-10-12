@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/vnd.microsoft.icon" href="/static/favicon.ico" />
+
+    <title>{{title}} - X6200 WebServer</title>
+    <link href="/static/css/base.css?v=2" rel="stylesheet">  <!-- v: new after a style change, browsers keep the old one -->
+    <link href="/static/css/siimple-icons.css" rel="stylesheet" />
+
+
+    <script src="/static/js/jquery-3.7.1.min.js" type="text/javascript"></script>
+
+    <script>
+      const mode_map = {
+        0: "LSB",
+        1: "LSB-D",
+        2: "USB",
+        3: "USB-D",
+        4: "CW",
+        5: "CW-R",
+        6: "AM",
+        7: "NFM",
+      };
+
+      /* HTTPS with the radio's self-signed certificate: Chrome's download manager does not take the
+       * exception the page has, so downloads failed with a network error. Through fetch() they do,
+       * saved from a blob. Plain HTTP keeps the browser's own download. */
+      const secureDownloads = location.protocol === "https:";
+
+      function x6100Download(url, init) {
+        return fetch(url, init).then(function(r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const m = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(r.headers.get("Content-Disposition") || "");
+          const name = decodeURIComponent(m ? m[1] : url.split("?")[0].split("/").pop());
+          return r.blob().then(function(b) {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(b);
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(function() { URL.revokeObjectURL(a.href); }, 60000);
+          });
+        });
+      }
+
+      /* A GET download (a link, a URL) and a POST one (a form) */
+      function x6100Get(url) {
+        if (!secureDownloads) { window.location = url; return; }
+        x6100Download(url).catch(function(e) { alert("Download failed: " + e.message); });
+      }
+
+      function x6100PostForm(form) {
+        if (!secureDownloads) { form.submit(); return; }
+        x6100Download(form.action, {method: "POST", body: new URLSearchParams(new FormData(form))})
+          .catch(function(e) { alert("Download failed: " + e.message); });
+      }
+
+      document.addEventListener("click", function(e) {
+        const a = e.target.closest && e.target.closest("a[download]");
+        if (!secureDownloads || !a || a.href.startsWith("blob:") || a.origin !== location.origin) return;
+        e.preventDefault();
+        x6100Get(a.href);
+      });
+    </script>
+  </head>
+  <body>
+    <header>
+      <div class="bar">
+        <a class="brand" href="/">
+          <svg width="30" height="30" viewBox="-40 -40 80 80" aria-hidden="true"><g fill="none" stroke="#ffb020" stroke-width="5" stroke-linecap="round"><path d="M-14 -20 A20 20 0 0 0 -14 8"/><path d="M14 -20 A20 20 0 0 1 14 8"/><path d="M-26 -32 A36 36 0 0 0 -26 20" opacity=".6"/><path d="M26 -32 A36 36 0 0 1 26 20" opacity=".6"/></g><line x1="0" y1="-8" x2="0" y2="30" stroke="#e6edf5" stroke-width="5"/><circle cx="0" cy="-10" r="5" fill="#ffb020"/></svg>
+          % call = callsign()
+          <div>X6200 <small>{{call + ' · ' if call else ''}}configurator</small> <small class="by">port of IU1WXY X6100</small></div>
+        </a>
+        <nav>
+          % menu = [('General', [('/', 'General')]),
+          %         ('Frequencies', [('/bands', 'Bands'), ('/digital_modes', 'Digital modes'), ('/memories', 'Memories')]),
+          %         ('Operating', [('/remote', 'Remote'), ('/cluster', 'Cluster'), ('/field', 'Field Ops'), ('/cw_messages', 'CW messages'), ('/logs', 'Logs')]),
+          %         ('Files', [('/files/', 'Files'), ('/gallery', 'Gallery'), ('/backup', 'Backup')]),
+          %         ('System', [('/time', 'Time'), ('/wfview', 'wfview')])]
+          % for group, items in menu:
+          % here = [request.path == h or (h != '/' and request.path.startswith(h)) for h, _ in items]
+          % if len(items) == 1:
+          <a href="{{items[0][0]}}"{{!' aria-current="page"' if here[0] else ''}}>{{group}}</a>
+          % else:
+          <div class="grp">
+            <button type="button"{{!' aria-current="page"' if any(here) else ''}}>{{group}} &#9662;</button>
+            <div class="sub">
+              % for (h, label), cur in zip(items, here):
+              <a href="{{h}}"{{!' aria-current="page"' if cur else ''}}>{{label}}</a>
+              % end
+            </div>
+          </div>
+          % end
+          % end
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      {{!base}}
+    </main>
+
+    <footer>X6200 custom firmware - web configurator ported from IU1WXY's X6100</footer>
+
+  </body>
+  </html>

@@ -1,0 +1,18 @@
+
+FILEBROWSER_PATH = ""
+DB_PATH = ""
+CLUSTER_CONF = "/mnt/cluster.conf"
+WFVIEW_CONF = "/mnt/wfview.conf"
+CHANNELS_FILE = "/mnt/channels.json"
+QSO_LOG_DB = "/mnt/qso_log.db"
+CW_TRAINER_FILE = "/mnt/cw_trainer.json"
+VOICE_DIR = "/mnt/msg"
+WIFI_DIR = "/etc/NetworkManager/system-connections"
+BACKUP_WORK = "/mnt/backup_work"    # uploaded backup, unpacked
+BACKUP_SAFETY = "/mnt/backup_before_restore"
+GUI_INIT = "/etc/init.d/S95gui"
+REMOTE_SOCK = "/tmp/x6200_remote.sock"
+FIELD_DIR = "/mnt/field"            # refs.tsv, qrz.conf, logs/*.adi (rootfs/usr/sbin/x6200-field)
+FIELD_CMD = "x6200-field"
+HTTPS_PORT = 0                      # set when the HTTPS server runs: the Remote page goes there
+HTTP_PORT = 80                      # the plain server: every other page
